@@ -5,16 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Will you be my Valentine?</title>
 
-  <!-- Confetti library -->
+  <!-- Confetti -->
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
   <style>
     :root {
-      --bg1: #ffd6e7;
-      --bg2: #ffeef6;
-      --card: #ffffffcc;
-      --yes: #ff3b7a;
-      --yesHover: #ff1f68;
+      --bg1: #0f1020;
+      --bg2: #2b1055;
+      --bg3: #ff4ecd;
+
+      --card: rgba(255,255,255,.92);
+
+      --yes1: #00f5a0;
+      --yes2: #00d9ff;
+
+      --no: #1f1f1f;
     }
 
     * { box-sizing: border-box; }
@@ -24,48 +29,83 @@
       min-height: 100svh;
       display: grid;
       place-items: center;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
+      background:
+        radial-gradient(circle at 20% 20%, var(--bg3), transparent 40%),
+        radial-gradient(circle at 80% 10%, #6c63ff, transparent 35%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
       font-family: system-ui, sans-serif;
       overflow: hidden;
       padding: 16px;
     }
 
-    /* FULL-SCREEN CONFETTI CANVAS */
+    /* FLOATING EMOJIS */
+    .emoji-layer {
+      position: fixed;
+      inset: 0;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .emoji {
+      position: absolute;
+      font-size: 28px;
+      opacity: 0.85;
+      animation: floatUp linear infinite;
+    }
+
+    @keyframes floatUp {
+      from {
+        transform: translateY(110vh) rotate(0deg);
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      to {
+        transform: translateY(-120vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* CONFETTI */
     #confettiCanvas {
       position: fixed;
       inset: 0;
-      width: 100vw;
-      height: 100vh;
       pointer-events: none;
       z-index: 9999;
     }
 
     .card {
+      position: relative;
+      z-index: 1;
       width: min(720px, 92vw);
-      padding: 26px 22px;
+      padding: 30px 22px 34px;
       background: var(--card);
-      backdrop-filter: blur(10px);
-      border-radius: 22px;
+      border-radius: 28px;
       text-align: center;
-      box-shadow: 0 18px 60px rgba(0,0,0,.15);
+      box-shadow:
+        0 22px 60px rgba(0,0,0,.3),
+        inset 0 0 0 3px rgba(255,255,255,.45);
+      backdrop-filter: blur(12px);
     }
 
-    .art {
-      width: min(260px, 80vw);
-      margin: 0 auto 10px;
-      display: block;
-      filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
+    .card::after {
+      content: "💘";
+      position: absolute;
+      top: -18px;
+      right: -14px;
+      font-size: 40px;
+      transform: rotate(12deg);
     }
 
     h1 {
       font-size: clamp(26px, 4vw, 44px);
-      margin: 12px 0 18px;
+      margin: 12px 0 22px;
     }
 
     .button-zone {
       position: relative;
       width: min(520px, 92%);
-      height: 150px;
+      height: 160px;
       margin: 0 auto;
       touch-action: none;
     }
@@ -74,46 +114,62 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      padding: 16px 24px;
+      padding: 16px 28px;
       font-size: 18px;
-      font-weight: 800;
+      font-weight: 900;
       border-radius: 999px;
       border: none;
       cursor: pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,.14);
       user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      transition: transform .12s ease, background .12s ease;
+      transition: transform .12s ease, filter .12s ease;
     }
 
+    /* HEARTBEAT YES */
     #yesBtn {
-      left: 18%;
-      background: var(--yes);
-      color: #fff;
+      left: 16%;
+      background: linear-gradient(135deg, var(--yes1), var(--yes2));
+      color: #003b3b;
+      box-shadow: 0 14px 30px rgba(0,255,200,.45);
+      animation: heartbeat 1.4s infinite;
     }
-    #yesBtn:hover { background: var(--yesHover); }
+
+    @keyframes heartbeat {
+      0%   { transform: translateY(-50%) scale(1); }
+      14%  { transform: translateY(-50%) scale(1.08); }
+      28%  { transform: translateY(-50%) scale(1); }
+      42%  { transform: translateY(-50%) scale(1.12); }
+      70%  { transform: translateY(-50%) scale(1); }
+      100% { transform: translateY(-50%) scale(1); }
+    }
 
     #noBtn {
       left: 62%;
-      background: #e5e7eb;
-      color: #111827;
+      background: var(--no);
+      color: #f9fafb;
+      box-shadow: 0 12px 24px rgba(0,0,0,.35);
     }
 
     .hint {
-      margin-top: 10px;
+      margin-top: 12px;
       font-size: 13px;
-      opacity: .7;
+      opacity: .75;
     }
 
     .result {
       display: none;
-      margin-top: 18px;
+      margin-top: 22px;
       animation: pop .35s ease;
     }
 
     .result h2 {
-      font-size: clamp(30px, 4.5vw, 46px);
-      margin: 10px 0;
+      font-size: clamp(30px, 4.5vw, 48px);
+      margin: 10px 0 6px;
+    }
+
+    .inside-joke {
+      font-size: 18px;
+      opacity: .85;
+      margin-bottom: 12px;
     }
 
     .fireworks {
@@ -123,54 +179,19 @@
     }
 
     @keyframes pop {
-      from { transform: scale(.96); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+      from { transform: scale(.94) rotate(-1deg); opacity: 0; }
+      to   { transform: scale(1) rotate(0); opacity: 1; }
     }
   </style>
 </head>
 
 <body>
+  <!-- FLOATING EMOJIS -->
+  <div class="emoji-layer" id="emojiLayer"></div>
+
   <canvas id="confettiCanvas"></canvas>
 
   <main class="card">
-    <!-- ANIMAL WITH HEART -->
-    <svg class="art" viewBox="0 0 320 240" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <linearGradient id="fur" x1="0" x2="1">
-          <stop offset="0" stop-color="#f7c7a1"/>
-          <stop offset="1" stop-color="#f2a97b"/>
-        </linearGradient>
-        <linearGradient id="heart" x1="0" x2="1">
-          <stop offset="0" stop-color="#ff4d7d"/>
-          <stop offset="1" stop-color="#ff1f68"/>
-        </linearGradient>
-      </defs>
-
-      <path d="M250 50 C250 33 270 25 282 38
-               C294 25 314 33 314 50
-               C314 78 282 92 282 106
-               C282 92 250 78 250 50Z"
-            fill="url(#heart)"/>
-
-      <path d="M90 120 C90 70 140 40 190 60
-               C240 40 290 70 290 120
-               C290 180 240 210 190 210
-               C140 210 90 180 90 120Z"
-            fill="url(#fur)"/>
-
-      <path d="M110 92 L95 55 L140 78 Z" fill="#f2a97b"/>
-      <path d="M270 92 L285 55 L240 78 Z" fill="#f2a97b"/>
-
-      <circle cx="160" cy="130" r="8"/>
-      <circle cx="220" cy="130" r="8"/>
-
-      <path d="M190 144 C186 144 182 148 182 152
-               C182 160 190 164 190 170
-               C190 164 198 160 198 152
-               C198 148 194 144 190 144Z"
-            fill="#ff7aa2"/>
-    </svg>
-
     <h1>Anuja will you be my valentine?</h1>
 
     <section class="button-zone" id="zone">
@@ -178,11 +199,14 @@
       <button id="noBtn">No</button>
     </section>
 
-    <!-- HINT -->
-    <div class="hint" id="hint">“No” seems a bit shy 😈</div>
+    <div class="hint" id="hint">The “No” is feeling dramatic today 😈</div>
 
     <section class="result" id="result">
-      <h2>YAY! 🎉</h2>
+      <h2>YAY!!! 🎉💖</h2>
+      <div class="inside-joke">
+        <!-- 👇 EDIT THIS LINE WITH YOUR INSIDE JOKE -->
+        Guess that means I owe you *that thing* 😏🍕
+      </div>
       <img
         class="fireworks"
         src="https://media.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"
@@ -203,15 +227,14 @@
 
     function resizeConfettiCanvas() {
       const dpr = Math.max(1, window.devicePixelRatio || 1);
-      confettiCanvas.width = Math.floor(window.innerWidth * dpr);
-      confettiCanvas.height = Math.floor(window.innerHeight * dpr);
+      confettiCanvas.width = window.innerWidth * dpr;
+      confettiCanvas.height = window.innerHeight * dpr;
       confettiCanvas.style.width = "100vw";
       confettiCanvas.style.height = "100vh";
     }
 
     resizeConfettiCanvas();
     window.addEventListener("resize", resizeConfettiCanvas);
-    window.addEventListener("orientationchange", () => setTimeout(resizeConfettiCanvas, 150));
 
     const confettiInstance = confetti.create(confettiCanvas, {
       resize: false,
@@ -220,13 +243,11 @@
 
     function fullScreenConfetti() {
       const end = Date.now() + 1600;
-
       (function frame() {
         confettiInstance({
           particleCount: 12,
-          spread: 90,
+          spread: 100,
           startVelocity: 45,
-          ticks: 180,
           origin: { x: Math.random(), y: Math.random() * 0.3 }
         });
         if (Date.now() < end) requestAnimationFrame(frame);
@@ -237,20 +258,23 @@
           particleCount: 300,
           spread: 140,
           startVelocity: 60,
-          ticks: 220,
           origin: { x: 0.5, y: 0.55 }
         });
       }, 300);
     }
 
-    /* ---------- YES BUTTON GROWS ---------- */
-    let yesScale = 1;
-    function growYes() {
-      yesScale = Math.min(2.2, yesScale + 0.1);
-      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
-    }
+    /* ---------- NO BUTTON CHAOS ---------- */
+    const noTexts = [
+      "No",
+      "nah",
+      "nope",
+      "absolutely not",
+      "try again",
+      "nice try",
+      "👀",
+      "lol no"
+    ];
 
-    /* ---------- NO BUTTON RUNS AWAY ---------- */
     function clamp(n, min, max) {
       return Math.max(min, Math.min(max, n));
     }
@@ -275,7 +299,7 @@
       noBtn.style.top = newTop + "px";
       noBtn.style.transform = "none";
 
-      growYes();
+      noBtn.textContent = noTexts[Math.floor(Math.random() * noTexts.length)];
     }
 
     zone.addEventListener("pointermove", e => {
@@ -292,14 +316,26 @@
     /* ---------- YES CLICK ---------- */
     yesBtn.addEventListener("click", () => {
       zone.style.display = "none";
-      hint.style.display = "none";     // HIDE THE HINT
+      hint.style.display = "none";
       result.style.display = "block";
       resizeConfettiCanvas();
       fullScreenConfetti();
     });
+
+    /* ---------- FLOATING EMOJIS ---------- */
+    const emojis = ["💖","💘","💝","💗","✨","🥰","😍"];
+    const layer = document.getElementById("emojiLayer");
+
+    for (let i = 0; i < 24; i++) {
+      const e = document.createElement("div");
+      e.className = "emoji";
+      e.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      e.style.left = Math.random() * 100 + "vw";
+      e.style.animationDuration = 12 + Math.random() * 12 + "s";
+      e.style.animationDelay = Math.random() * 10 + "s";
+      e.style.fontSize = 22 + Math.random() * 22 + "px";
+      layer.appendChild(e);
+    }
   </script>
 </body>
 </html>
-
-
-
